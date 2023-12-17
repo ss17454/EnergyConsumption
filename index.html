@@ -1,0 +1,99 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Your App</title>
+   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap">
+   <style>
+       body {
+           font-family: 'Open Sans', sans-serif;
+           background-color: #aed6f1; /* Light blue background color */
+           color: #34495e; /* Dark gray text color */
+           padding: 20px;
+           text-align: center;
+           opacity: 0;
+           animation: fadeIn 1s ease-in-out forwards;
+       }
+
+
+       h1 {
+           color: #2c3e50; /* Dark blue heading color */
+       }
+
+
+       p {
+           color: #34495e;
+       }
+
+
+       a {
+           text-decoration: none;
+           color: #e74c3c;
+           font-weight: bold;
+       }
+
+
+       a:hover {
+           color: #c0392b;
+       }
+
+
+       .logged-in {
+           background-color: #2ecc71;
+           padding: 10px;
+           border-radius: 5px;
+       }
+
+
+       .login-button {
+           background-color: #e74c3c;
+           color: #fff;
+           padding: 10px 20px;
+           border: none;
+           border-radius: 5px;
+           font-size: 16px;
+           margin-top: 20px;
+           cursor: pointer;
+           transition: background-color 0.3s ease;
+       }
+
+
+       .login-button:hover {
+           background-color: #c0392b;
+       }
+
+
+       @keyframes fadeIn {
+           from {
+               opacity: 0;
+           }
+           to {
+               opacity: 1;
+           }
+       }
+   </style>
+</head>
+<body>
+   <h1>Welcome to Energy Consumption Tracking App!</h1>
+  
+   {% if 'username' in session %}
+       <div class="logged-in">
+           <p>Logged in as {{ session['username'] }} <br><a href="/logout">Logout</a></p>
+       </div>
+   {% else %}
+       <p>Login to view your energy consumption so far..! <br><br></p>
+       <button class="login-button" onclick="window.location.href='/login'">Login</button>
+   {% endif %}
+
+
+   <!-- Replace the following image path with your actual image path or URL -->
+</body>
+</html>
+
+
+
+
+
+

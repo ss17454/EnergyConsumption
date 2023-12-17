@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yearly Energy Consumption</title>
+  <!-- Include Chart.js library for plotting graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h2>Yearly Energy Consumption</h2>
+   <!-- Container for displaying the graph -->
+  <canvas id="yearlyEnergyConsumptionGraph"></canvas>
+
+  <!-- Add this input field to dailyEnergyConsumption.html -->
+  <form method="post" action="{{ url_for('yearly_energy_consumption', location_id=location_id) }}">
+    <label for="selected_date">Select Date:</label>
+    <input type="date" id="selected_date" name="selected_date" value="{{ selected_date }}" required>
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      console.log("Starting:");
+      generateYearlyEnergyConsumptionGraph();
+    });
+  
+    function generateYearlyEnergyConsumptionGraph() {
+      var location_id = "{{ location_id }}";
+      var selected_date = "{{ selected_date }}";
+  
+      // Parse the year from the selected date
+      var selectedYear = new Date(selected_date).getFullYear();
+  
+      // Generate an array of years starting from the selected year and for the next 10 years
+      var years = [];
+      for (var year = selectedYear; year < selectedYear + 10; year++) {
+        years.push(year.toString());
+      }
+  
+      // Fetch yearly energy consumption data from the backend
+      fetch('/get_yearly_energy_consumption', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          location_id: location_id,
+          selected_date: selected_date,
+        }),
+      })
+      .then(response => {
+        console.log("Response:", response);
+        return response.json();
+      })
+      .then(data => {
+        console.log("Data received:", data);
+  
+        // Extract values for plotting the graph
+        var values = data.values; // Yearly energy consumption values
+  
+        // Plot the graph using Chart.js
+        var ctx = document.getElementById('yearlyEnergyConsumptionGraph').getContext('2d');
+        var myChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: years, // Use the generated years array
+            datasets: [{
+              label: 'Yearly Energy Consumption',
+              data: values,
+              fill: false,
+              borderColor: 'rgb(75, 192, 192)',
+              tension: 0.1,
+            }],
+          },
+          options: {
+            scales: {
+              x: {
+                type: 'category',
+                labels: years,
+                title: {
+                  display: true,
+                  text: 'Year',
+                },
+              },
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Total Energy Consumption',
+                },
+              },
+            },
+          },
+        });
+      })
+      .catch(error => console.error('Error:', error));
+    }
+  </script>
+    
+</body>
+</html>

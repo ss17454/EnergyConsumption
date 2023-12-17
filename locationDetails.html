@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location Details</title>
+    <!-- Include Chart.js library for plotting graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+            margin: 0;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        p {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+        }
+
+        a {
+            display: inline-block;
+            background-color: #0056b3;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            margin: 5px 0;
+        }
+
+        a:hover {
+            background-color: #004494;
+        }
+    </style>
+</head>
+<body>
+    <h2>Location Details</h2>
+    <p>Location ID: {{ location_details[0] }}</p>
+    <p>Unit Number: {{ location_details[2] }}</p>
+    <p>Move-In Date: {{ location_details[3] }}</p>
+    <p>Square Footage: {{ location_details[4] }}</p>
+    <p>City: {{ location_details[5] }}</p>
+    <p>Street: {{ location_details[6] }}</p>
+    <p>Zipcode: {{ location_details[7] }}</p>
+
+    <h2>Energy Consumption Details</h2>
+
+    <a href="{{ url_for('daily_energy_consumption', location_id=location_details[0]) }}">
+        View Daily Energy Consumption
+    </a>
+    <br>
+    <a href="{{ url_for('total_energy_consumption', location_id=location_details[0]) }}">
+        View Total Energy Consumption
+    </a>
+    <br>
+    <a href="{{ url_for('yearly_energy_consumption', location_id=location_details[0]) }}">
+        View Yearly Energy Consumption
+    </a>
+    <br>
+    <a href="{{ url_for('hourly_energy_price', location_id=location_details[0]) }}">
+        View Hourly Energy Price
+    </a>
+    <!-- <br>
+    <a href="{{ url_for('daily_energy_price_consumption', location_id=location_details[0]) }}">
+        View Daily Energy Price Consumption
+      </a> -->
+</body>
+</html>

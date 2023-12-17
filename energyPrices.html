@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Energy Consumption</title>
+  <!-- Include Chart.js library for plotting graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h2>Daily Energy Price Consumption</h2>
+   <!-- Container for displaying the graph -->
+  <canvas id="dailyEnergyPriceConsumptionGraph"></canvas>
+
+
+
+
+ <!--  Add this input field to dailyEnergyConsumption.html -->
+<form method="post" action="{{ url_for('daily_energy_price_consumption', location_id=location_id) }}">
+  <label for="selected_date">Select Date:</label>
+  <input type="date" id="selected_date" name="selected_date" value="{{ selected_date }}" required>
+  <button type="submit">Submit</button>
+</form>
+
+
+
+
+<script>
+     document.addEventListener('DOMContentLoaded', function () {
+        console.log("!!!!!!!!!!!!!! starting:");
+        generateDailyEnergyConsumptionGraph();
+     });
+
+
+     function generateDailyEnergyConsumptionGraph() {
+        var location_id = "{{ location_id }}";
+        var selected_date = "{{ selected_date }}";
+
+
+        // Fetch daily energy consumption data from the backend
+        fetch('/get_daily_energy_price_consumption', {
+           method: 'POST',
+           headers: {
+              'Content-Type': 'application/json',
+           },
+
+
+           body: JSON.stringify({
+              location_id: location_id,
+              selected_date: selected_date,
+           }),
+        })
+        .then(response => {
+           console.log("Response:", response);
+           return response.json();
+        })
+        .then(data => {
+           console.log("Data received:", data);
+
+
+           // Extract data for plotting the graph
+           var timestamps = data.labels; // Timestamps
+           var values = data.values; // Energy consumption values
+           console.log("Timestamps:", timestamps);
+           console.log("Values:", values);
+
+
+           // Plot the graph using Chart.js
+           var ctx = document.getElementById('dailyEnergyPriceConsumptionGraph').getContext('2d');
+           var myChart = new Chart(ctx, {
+              type: 'line',
+              data: {
+                 labels: timestamps,
+                 datasets: [{
+                    label: 'Energy Price',
+                    data: values,
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 7,
+                 }],
+              },
+              options: {
+                 scales: {
+                   x: {
+                       type: 'category', // Use 'category' scale for timestamps
+                       labels: timestamps,
+                       maxRotation: 0,
+                       minRotation: 0,
+                       title: {
+                          display: true,
+                          text: 'Time',
+                       },
+                       ticks: {
+                          stepSize: 1, // Adjust as needed for better visibility
+                       },
+                    },
+                    y: {
+                       beginAtZero: true,
+                       title: {
+                          display: true,
+                          text: ' Price',
+                       },
+                    },
+                 },
+              },
+           });
+        })
+        .catch(error => console.error('Error:', error));
+     }
+  </script>
+</body>
+</html>

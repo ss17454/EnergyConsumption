@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Energy Consumption</title>
+  <!-- Include Chart.js library for plotting graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h2>Total Energy Consumption</h2>
+   <!-- Container for displaying the graph -->
+  <canvas id="totalEnergyConsumptionGraph"></canvas>
+
+
+  <!-- Add this input field to dailyEnergyConsumption.html -->
+<form method="post" action="{{ url_for('total_energy_consumption', location_id=location_id) }}">
+  <label for="selected_date">Select Date:</label>
+  <input type="date" id="selected_date" name="selected_date" value="{{ selected_date }}" required>
+  <button type="submit">Submit</button>
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+      console.log("Starting:");
+      generateDailyEnergyConsumptionGraph();
+    });
+  
+    function generateDailyEnergyConsumptionGraph() {
+      var location_id = "{{ location_id }}";
+      var selected_date = "{{ selected_date }}";
+  
+      // Fetch daily energy consumption data from the backend
+      fetch('/get_total_energy_consumption', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          location_id: location_id,
+          selected_date: selected_date,
+        }),
+      })
+      .then(response => {
+        console.log("Response:", response);
+        return response.json();
+      })
+      .then(data => {
+        console.log("Data received:", data);
+  
+        // Extract data for plotting the graph
+        var values = data.values; // Energy consumption values
+  
+        // Create hourly timestamps for the X-axis
+        var hourlyTimestamps = [];
+        for(var i = 0; i < 24; i++) {
+          hourlyTimestamps.push(i + ':00');
+        }
+  
+        // Plot the graph using Chart.js
+        var ctx = document.getElementById('totalEnergyConsumptionGraph').getContext('2d');
+        var myChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: hourlyTimestamps, // Use the hourly timestamps
+            datasets: [{
+              label: 'Total Energy Consumption',
+              data: values,
+              fill: false,
+              borderColor: 'rgb(75, 192, 192)',
+              tension: 50,
+            }],
+          },
+          options: {
+            scales: {
+              x: {
+                type: 'category',
+                labels: hourlyTimestamps,
+                beginAtZero: true,
+                maxRotation: 0,
+                minRotation: 0,
+                title: {
+                  display: true,
+                  text: 'Time (Hourly)',
+                },
+              },
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Total Energy Consumption by your location',
+                },
+              },
+            },
+          },
+        });
+      })
+      .catch(error => console.error('Error:', error));
+    }
+  </script>
+  
+</body>
+</html>
+
+

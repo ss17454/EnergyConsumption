@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        form {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        input[type="submit"], button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: #0056b3;
+            color: white;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover, button:hover {
+            background-color: #004494;
+        }
+
+        a {
+            color: #0056b3;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .location-button {
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: left;
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: none;
+        }
+
+        .location-button:hover {
+            background-color: #e9e9e9;
+        }
+
+    </style>
+</head>
+<body>
+    <h2>Welcome to your Dashboard!</h2>
+    <form id="deviceForm" method="POST" action="/save_device">
+        <!-- First Dropdown -->
+        <label for="firstDropdown">Model Type:</label>
+        <select id="firstDropdown" name="firstDropdown">
+            <option value="" selected disabled>Please select</option>
+            {% for value in first_dropdown_values %}
+                <option>{{ value[0] }}</option>
+            {% endfor %}
+            <option value="Other">Other</option>
+        </select><br>
+ 
+
+        <!-- Second Dropdown -->
+        <label for="secondDropdown">Model Number:</label>
+        <select id="secondDropdown" name="secondDropdown"></select>
+
+        <label for="location_id">Select Location ID:</label>
+       <select name="location_id" id="location_id">
+           {% for id in location_ids %}
+               <option value="{{ id }}">{{ id }}</option>
+           {% endfor %}
+       </select>
+       <br>
+       <input type="submit" value="Submit">
+
+    </form>
+   
+    <!-- Add New Device Button (Initially Hidden) -->
+    <button type="button" id="addNewDeviceButton" style="display: none;" onclick="showNewDeviceForm()">Add New Device</button>
+
+    <form id="newDeviceForm" style="display: none;">
+        <label for="newModelType">Model Type:</label>
+        <input type="text" id="newModelType" name="newModelType" required><br>
+        <label for="newModelNumber">Model Number:</label>
+        <input type="text" id="newModelNumber" name="newModelNumber" required><br>
+        <button type="button" onclick="addNewDevice()">Save</button>
+    </form>
+
+    <button type="button" id="addNewLocationButton" onclick="toggleNewLocationForm()">Add New Service Location</button>
+    <form id="newLocationForm" style="display: none;" method="POST" action="{{ url_for('add_new_service_location', cust_ID=cust_ID) }}">
+    <label for="unitNumber">Unit Number:</label>
+    <input type="text" id="unitNumber" name="unitNumber" required><br>
+ 
+ 
+    <label for="moveInDate">Move-In Date:</label>
+    <input type="date" id="moveInDate" name="moveInDate" required><br>
+ 
+ 
+    <label for="squareFootage">Square Footage:</label>
+    <input type="number" id="squareFootage" name="squareFootage" required><br>
+ 
+ 
+    <label for="bedrooms">Bedrooms:</label>
+    <input type="number" id="bedrooms" name="bedrooms" required><br>
+ 
+ 
+    <label for="occupants">Occupants:</label>
+    <input type="number" id="occupants" name="occupants" required><br>
+ 
+ 
+    <label for="city">City:</label>
+    <input type="text" id="city" name="city" required><br>
+ 
+ 
+    <label for="street">Street:</label>
+    <input type="text" id="street" name="street" required><br>
+ 
+ 
+    <label for="zipCode">Zip Code:</label>
+    <input type="text" id="zipCode" name="zipCode" required><br>
+ 
+ 
+ 
+ 
+ 
+ 
+    <button type="submit">Save</button>
+ 
+ 
+ </form>
+ 
+
+
+    <!-- Include JavaScript to dynamically update the second dropdown -->
+    <script>
+        document.getElementById('firstDropdown').addEventListener('change', function () {
+            var selectedValue = this.value;
+
+            // Fetch options for the second dropdown based on the selected value
+            fetch('/get_second_dropdown', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                },
+                body: 'selected_value=' + encodeURIComponent(selectedValue),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Update the options in the second dropdown
+                var secondDropdown = document.getElementById('secondDropdown');
+                secondDropdown.innerHTML = '';
+                data.options.forEach(function(option) {
+                    var optionElement = document.createElement('option');
+                    optionElement.value = option[0];
+                    optionElement.textContent = option[0];
+                    secondDropdown.appendChild(optionElement);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+
+            // Show or hide the new form based on the selected value
+            var addNewDeviceButton = document.getElementById('addNewDeviceButton');
+            var newDeviceForm = document.getElementById('newDeviceForm');
+            if (selectedValue === 'Other') {
+                addNewDeviceButton.style.display = 'block';
+                newDeviceForm.style.display = 'block';
+            } else {
+                addNewDeviceButton.style.display = 'none';
+                newDeviceForm.style.display = 'none';
+            }
+        });
+
+        function showNewDeviceForm() {
+            // Show the new device form when the button is clicked
+            var newDeviceForm = document.getElementById('newDeviceForm');
+            newDeviceForm.style.display = 'block';
+        }
+
+        function addNewDevice() {
+            // ... (existing JavaScript code for adding a new device)
+            var newModelType = document.getElementById('newModelType').value;
+            var newModelNumber = document.getElementById('newModelNumber').value;
+
+            // Insert new device into the database
+            fetch('/add_new_device', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                },
+                body: 'newModelType=' + encodeURIComponent(newModelType) + '&newModelNumber=' + encodeURIComponent(newModelNumber),
+            })
+            .then(response => response.text())
+            .then(data => {
+                // Handle the response (e.g., show a message to the user)
+                alert(data);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        function toggleNewLocationForm() {
+       var newLocationForm = document.getElementById('newLocationForm');
+       newLocationForm.style.display = newLocationForm.style.display === 'none' ? 'block' : 'none';
+   }
+
+
+   function addNewServiceLocation() {
+       var formData = new FormData(document.getElementById('newLocationForm'));
+
+
+       fetch('/add_new_service_location',+ encodeURIComponent(location_id), {
+           method: 'POST',
+           body: formData,
+       })
+       .then(response => response.text())
+       .then(data => {
+           log.console(data)
+           alert(data);
+           // Optionally, reset the form or take other actions after a successful submission
+           // resetForm();  // Replace with the actual function to reset the form
+       })
+       .catch(error => {
+           console.error('Error:', error);
+           // Handle errors if needed
+       });
+   }
+
+    </script>
+
+<h2>Customer Locations</h2>
+{% if locations %}
+   {% for location in locations %}
+       <form action="/location_details" method="post">
+           <button type="submit" name="location_id" value="{{ location[0] }}">
+               Location {{ location[0] }}
+           </button>
+       </form>
+   {% endfor %}
+{% else %}
+   <p>No locations found for this customer.</p>
+{% endif %}
+
+
+<!-- Section for Deleting a Service Location -->
+<h2>Delete Service Location</h2>
+<form method="POST" action="/delete_location">
+    <label for="deleteLocationId">Select Location ID to Delete:</label>
+    <select name="deleteLocationId" id="deleteLocationId">
+        {% for id in location_ids %}
+            <option value="{{ id }}">{{ id }}</option>
+        {% endfor %}
+    </select>
+    <br>
+    <input type="submit" value="Delete Location">
+</form>
+
+
+    <p><a href="/logout">Logout</a></p>
+</body>
+</html>
